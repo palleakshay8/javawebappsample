@@ -15,7 +15,7 @@ node {
     }
   
     stage('build') {
-      sh 'mvn clean package'
+      bat 'mvn clean package'
     }
   
     stage('deploy') {
@@ -23,7 +23,7 @@ node {
       def webAppName = '<app_name>'
       // login Azure
       withCredentials([usernamePassword(credentialsId: '<service_princial>', passwordVariable: 'AZURE_CLIENT_SECRET', usernameVariable: 'AZURE_CLIENT_ID')]) {
-       sh '''
+       bat '''
           az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET -t $AZURE_TENANT_ID
           az account set -s $AZURE_SUBSCRIPTION_ID
         '''
@@ -32,9 +32,9 @@ node {
       def pubProfilesJson = sh script: "az webapp deployment list-publishing-profiles -g $resourceGroup -n $webAppName", returnStdout: true
       def ftpProfile = getFtpPublishProfile pubProfilesJson
       // upload package
-      sh "curl -T target/calculator-1.0.war $ftpProfile.url/webapps/ROOT.war -u '$ftpProfile.username:$ftpProfile.password'"
+      bat "curl -T target/calculator-1.0.war $ftpProfile.url/webapps/ROOT.war -u '$ftpProfile.username:$ftpProfile.password'"
       // log out
-      sh 'az logout'
+      bat'az logout'
     }
   }
 }
